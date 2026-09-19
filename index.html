@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>🎁 You've got a birthday surprise</title>
+<meta property="og:title" content="🎁 You've got a birthday surprise">
+<meta property="og:description" content="Tap to open…">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://lab8xyz.github.io/for-scott/gift.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg1:#1a1033; --bg2:#3b1d5e; --gold:#ffcf5c; --pink:#ff5c8a; --text:#fff6e9; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; }
+  body {
+    font-family: Inter, system-ui, sans-serif; color: var(--text);
+    background: radial-gradient(ellipse at top, var(--bg2), var(--bg1) 70%);
+    display:flex; align-items:center; justify-content:center;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+    overflow-x:hidden; text-align:center;
+  }
+  #stars { position:fixed; inset:0; pointer-events:none; z-index:0; }
+  #confetti { position:fixed; inset:0; pointer-events:none; z-index:5; }
+  main { position:relative; z-index:2; width:100%; max-width:640px; }
+
+  /* Gift stage */
+  #gift-stage { cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; }
+  .hint { font-size:1.1rem; opacity:.85; margin-top:28px; letter-spacing:.02em; animation: pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity:.4; } }
+  .gift { position:relative; width:180px; height:170px; margin:0 auto; animation: wobble 2.4s ease-in-out infinite; }
+  @keyframes wobble { 0%,70%,100%{transform:rotate(0)} 75%{transform:rotate(-5deg)} 80%{transform:rotate(5deg)} 85%{transform:rotate(-3deg)} 90%{transform:rotate(2deg)} }
+  .box { position:absolute; bottom:0; left:10px; width:160px; height:115px; background:var(--pink); border-radius:6px;
+         box-shadow: inset -14px 0 0 rgba(0,0,0,.12); }
+  .lid { position:absolute; top:30px; left:0; width:180px; height:36px; background:#ff7aa0; border-radius:6px;
+         box-shadow: inset -14px 0 0 rgba(0,0,0,.1); transition: transform .7s cubic-bezier(.3,1.6,.5,1), opacity .7s; z-index:2; }
+  .ribbon-v { position:absolute; bottom:0; left:78px; width:24px; height:115px; background:var(--gold); }
+  .lid .ribbon-v { height:36px; left:78px; top:0; }
+  .bow { position:absolute; top:-26px; left:60px; width:60px; height:32px; }
+  .bow::before, .bow::after { content:""; position:absolute; top:0; width:30px; height:30px; border:8px solid var(--gold); border-radius:50% 50% 0 50%; }
+  .bow::before { left:0; transform:rotate(-20deg); }
+  .bow::after { right:0; border-radius:50% 50% 50% 0; transform:rotate(20deg); }
+  .opened .gift { animation:none; }
+  .opened .lid { transform: translateY(-140px) rotate(-25deg); opacity:0; }
+  .opened .box { transition: transform .5s .2s, opacity .5s .2s; transform: scale(.6); opacity:0; }
+  .opened .ribbon-v { opacity:0; transition: opacity .4s .2s; }
+  .opened .hint { display:none; }
+
+  /* Reveal */
+  #reveal { opacity:0; transform: translateY(20px); transition: opacity .9s .5s, transform .9s .5s; }
+  #reveal.show { opacity:1; transform:none; }
+  h1 { font-family: Fraunces, Georgia, serif; font-size: clamp(2.2rem, 9vw, 3.8rem); line-height:1.05; margin: 0 0 16px;
+       background: linear-gradient(90deg, var(--gold), var(--pink), var(--gold)); background-size:200% auto;
+       -webkit-background-clip:text; background-clip:text; color:transparent; animation: shine 4s linear infinite; }
+  @keyframes shine { to { background-position: 200% center; } }
+  .msg { font-size: 1.15rem; line-height:1.6; margin: 0 auto 24px; max-width: 34em; white-space: pre-line; }
+  .from { opacity:.8; margin-top: 18px; font-style: italic; }
+  .play-btn { display:inline-block; margin-top:6px; padding:18px 34px; border-radius:999px; font-weight:600; font-size:1.25rem;
+              color:#1a1033; text-decoration:none; background:linear-gradient(90deg,var(--gold),#ffb36b);
+              box-shadow:0 10px 30px rgba(255,207,92,.35); animation: bob 1.6s ease-in-out infinite; }
+  .play-btn:active { transform:scale(.96); }
+  @keyframes bob { 50% { transform: translateY(-4px); box-shadow:0 16px 36px rgba(255,207,92,.5); } }
+  .play-note { font-size:.95rem; opacity:.75; margin:14px 0 0; }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<canvas id="confetti"></canvas>
+<main>
+  <div id="gift-stage" role="button" aria-label="Open your present" tabindex="0">
+    <div class="gift">
+      <div class="lid"><div class="ribbon-v"></div><div class="bow"></div></div>
+      <div class="box"><div class="ribbon-v"></div></div>
+    </div>
+    <div class="hint">Tap to open your present 🎁</div>
+  </div>
+
+  <section id="reveal" aria-live="polite">
+    <h1 id="title"></h1>
+    <p class="msg" id="msg"></p>
+    <a class="play-btn" id="play" href="#" target="_blank" rel="noopener">▶&nbsp; Play your song</a>
+    <p class="play-note">Volume all the way up 🔊</p>
+    <p class="from" id="from"></p>
+  </section>
+</main>
+
+<script>
+  // ====== EDIT ME ======
+  const CONFIG = {
+    name:    "Scott",
+    message: `Another year older, another year wiser.
+Well… older, anyway.
+
+For a man of your stature and refinement, a text simply wouldn't do. So I went digging through the dusty archives of 1940s vinyl to find a timeless classic worthy of the occasion.
+
+A rare recording. Sung with real sincerity.
+Some say it was written with you in mind.
+
+Best enjoyed loud. Ideally somewhere public.`,
+    from:    "— Mellis",
+    videoId: "It-PblOKfDo",
+    start:   0          // seconds to start the song at (0 = beginning)
+  };
+  // =====================
+
+  document.getElementById('title').textContent = `Happy Birthday, ${CONFIG.name}!`;
+  document.getElementById('msg').textContent = CONFIG.message;
+  document.getElementById('from').textContent = CONFIG.from;
+
+  document.getElementById('play').href = `https://youtu.be/${CONFIG.videoId}` + (CONFIG.start ? `?t=${CONFIG.start}` : '');
+
+  // --- Open the gift ---
+  let opened = false;
+  function openGift() {
+    if (opened) return; opened = true;
+    document.body.classList.add('opened');
+    document.getElementById('reveal').classList.add('show');
+    setTimeout(() => document.getElementById('gift-stage').style.display = 'none', 900);
+    burst();
+  }
+  const stage = document.getElementById('gift-stage');
+  stage.addEventListener('click', openGift);
+  stage.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openGift(); });
+
+  // --- Twinkling stars ---
+  const sc = document.getElementById('stars'), sx = sc.getContext('2d');
+  let stars = [];
+  function sizeCanvases() {
+    for (const c of [sc, cc]) { c.width = innerWidth * devicePixelRatio; c.height = innerHeight * devicePixelRatio; }
+    stars = Array.from({length: 90}, () => ({ x: Math.random()*sc.width, y: Math.random()*sc.height,
+      r: (Math.random()*1.4+.3)*devicePixelRatio, p: Math.random()*Math.PI*2 }));
+  }
+  function drawStars(t) {
+    sx.clearRect(0,0,sc.width,sc.height);
+    for (const s of stars) { sx.globalAlpha = .35 + .35*Math.sin(t/700 + s.p); sx.beginPath(); sx.arc(s.x,s.y,s.r,0,7); sx.fillStyle='#fff'; sx.fill(); }
+    requestAnimationFrame(drawStars);
+  }
+
+  // --- Confetti ---
+  const cc = document.getElementById('confetti'), cx = cc.getContext('2d');
+  const colors = ['#ffcf5c','#ff5c8a','#7ae0ff','#9dff7a','#c38bff','#fff'];
+  let bits = [];
+  function burst() {
+    const W = cc.width, H = cc.height, d = devicePixelRatio;
+    for (let i = 0; i < 220; i++) bits.push({
+      x: W/2, y: H*0.45, vx: (Math.random()-.5)*22*d, vy: (Math.random()*-18-6)*d,
+      w: (6+Math.random()*6)*d, h: (10+Math.random()*8)*d, rot: Math.random()*6, vr: (Math.random()-.5)*.4,
+      c: colors[i % colors.length], life: 0 });
+    // gentle rain afterwards
+    let n = 0; const rain = setInterval(() => {
+      for (let i = 0; i < 6; i++) bits.push({ x: Math.random()*W, y: -20*d, vx:(Math.random()-.5)*2*d, vy: (2+Math.random()*2)*d,
+        w:(6+Math.random()*5)*d, h:(9+Math.random()*6)*d, rot:Math.random()*6, vr:(Math.random()-.5)*.2, c: colors[(Math.random()*colors.length)|0], life:0 });
+      if (++n > 40) clearInterval(rain);
+    }, 120);
+  }
+  function drawConfetti() {
+    cx.clearRect(0,0,cc.width,cc.height);
+    const d = devicePixelRatio;
+    bits = bits.filter(b => b.y < cc.height + 40*d);
+    for (const b of bits) {
+      b.vy += .35*d; b.vx *= .99; b.vy = Math.min(b.vy, 7*d); b.x += b.vx; b.y += b.vy; b.rot += b.vr;
+      cx.save(); cx.translate(b.x,b.y); cx.rotate(b.rot); cx.scale(1, Math.cos(b.rot*2));
+      cx.fillStyle = b.c; cx.fillRect(-b.w/2,-b.h/2,b.w,b.h); cx.restore();
+    }
+    requestAnimationFrame(drawConfetti);
+  }
+
+  addEventListener('resize', sizeCanvases);
+  sizeCanvases(); requestAnimationFrame(drawStars); requestAnimationFrame(drawConfetti);
+</script>
+</body>
+</html>
