@@ -14,17 +14,17 @@
 <style>
   :root { --bg1:#1a1033; --bg2:#3b1d5e; --gold:#ffcf5c; --pink:#ff5c8a; --text:#fff6e9; }
   * { box-sizing: border-box; }
-  html, body { margin:0; height:100%; }
+  html, body { margin:0; }
   body {
     font-family: Inter, system-ui, sans-serif; color: var(--text);
     background: radial-gradient(ellipse at top, var(--bg2), var(--bg1) 70%);
-    display:flex; align-items:center; justify-content:center;
+    display:flex; min-height:100vh; min-height:100dvh;
     padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
     overflow-x:hidden; text-align:center;
   }
   #stars { position:fixed; inset:0; pointer-events:none; z-index:0; }
   #confetti { position:fixed; inset:0; pointer-events:none; z-index:5; }
-  main { position:relative; z-index:2; width:100%; max-width:640px; }
+  main { position:relative; z-index:2; width:100%; max-width:640px; margin:auto; }
 
   /* Gift stage */
   #gift-stage { cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; }
@@ -49,8 +49,9 @@
   .opened .hint { display:none; }
 
   /* Reveal */
-  #reveal { opacity:0; transform: translateY(20px); transition: opacity .9s .5s, transform .9s .5s; }
-  #reveal.show { opacity:1; transform:none; }
+  #reveal { display:none; }
+  #reveal.show { display:block; animation: fadeUp .9s ease-out both; }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(24px); } }
   h1 { font-family: Fraunces, Georgia, serif; font-size: clamp(2.2rem, 9vw, 3.8rem); line-height:1.05; margin: 0 0 16px;
        background: linear-gradient(90deg, var(--gold), var(--pink), var(--gold)); background-size:200% auto;
        -webkit-background-clip:text; background-clip:text; color:transparent; animation: shine 4s linear infinite; }
@@ -116,8 +117,10 @@ Best enjoyed loud. Ideally somewhere public.`,
   function openGift() {
     if (opened) return; opened = true;
     document.body.classList.add('opened');
-    document.getElementById('reveal').classList.add('show');
-    setTimeout(() => document.getElementById('gift-stage').style.display = 'none', 900);
+    setTimeout(() => {
+      document.getElementById('gift-stage').style.display = 'none';
+      document.getElementById('reveal').classList.add('show');
+    }, 700);
     burst();
   }
   const stage = document.getElementById('gift-stage');
