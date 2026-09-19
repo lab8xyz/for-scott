@@ -53,15 +53,14 @@
   #reveal.show { animation: fadeUp .9s ease-out both; }
   .sound { margin-top:10px; font-size:.95rem; opacity:.6; }
   .opened .sound { display:none; }
-  .video-wrap { width:100%; max-width:420px; margin:0 auto; border-radius:14px; overflow:hidden; background:#000;
-                box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 0 3px rgba(255,207,92,.35); }
-  .video-wrap video { display:block; width:100%; height:auto; }
+  .pill { margin-top:22px; padding:10px 20px; border-radius:999px; border:1px solid rgba(255,207,92,.5);
+          background:rgba(255,207,92,.12); color:var(--gold); font:600 .95rem Inter, system-ui, sans-serif; cursor:pointer; }
   @keyframes fadeUp { from { opacity:0; transform: translateY(24px); } }
   h1 { font-family: Fraunces, Georgia, serif; font-size: clamp(2.2rem, 9vw, 3.8rem); line-height:1.05; margin: 0 0 16px;
        background: linear-gradient(90deg, var(--gold), var(--pink), var(--gold)); background-size:200% auto;
        -webkit-background-clip:text; background-clip:text; color:transparent; animation: shine 4s linear infinite; }
   @keyframes shine { to { background-position: 200% center; } }
-  .msg { font-size: 1.15rem; line-height:1.6; margin: 24px auto 0; max-width: 34em; white-space: pre-line; }
+  .msg { font-size: 1.15rem; line-height:1.6; margin: 0 auto; max-width: 34em; white-space: pre-line; }
   .from { opacity:.8; margin-top: 18px; font-style: italic; }
   .play-note a { color: var(--gold); }
   .play-note { font-size:.95rem; opacity:.75; margin:14px 0 0; }
@@ -82,11 +81,11 @@
 
   <section id="reveal" aria-live="polite">
     <h1 id="title"></h1>
-    <div class="video-wrap"><video id="song" src="song.mp4" playsinline controls preload="auto"></video></div>
-    <p class="play-note" id="tap-play" hidden>Tap ▶︎ to play your song</p>
-    <p class="play-note" id="yt" hidden><a href="https://youtu.be/It-PblOKfDo" target="_blank" rel="noopener">Song not loading? Watch it on YouTube ▶︎</a></p>
     <p class="msg" id="msg"></p>
     <p class="from" id="from"></p>
+    <audio id="song" src="song.m4a" preload="auto"></audio>
+    <button class="pill" id="toggle" type="button">❚❚ Pause song</button>
+    <p class="play-note" id="yt" hidden><a href="https://youtu.be/It-PblOKfDo" target="_blank" rel="noopener">Song not loading? Listen on YouTube ▶︎</a></p>
   </section>
 </main>
 
@@ -112,13 +111,15 @@ Best enjoyed loud. Ideally somewhere public.`,
   document.getElementById('msg').textContent = CONFIG.message;
   document.getElementById('from').textContent = CONFIG.from;
 
-  const song = document.getElementById('song');
+  const song = document.getElementById('song'), toggle = document.getElementById('toggle');
   song.addEventListener('error', () => { document.getElementById('yt').hidden = false; });
+  const label = () => toggle.textContent = song.paused ? (song.ended ? '↻ Play it again' : '▶ Play song') : '❚❚ Pause song';
+  ['play','pause','ended'].forEach(e => song.addEventListener(e, label));
+  toggle.addEventListener('click', () => song.paused ? song.play() : song.pause());
   function play() {
     if (CONFIG.start) song.currentTime = CONFIG.start;
-    song.muted = false; song.volume = 1;
     const p = song.play();   // called inside the tap so phones allow sound
-    if (p) p.catch(() => { document.getElementById('tap-play').hidden = false; });
+    if (p) p.catch(label);
   }
 
   // --- Open the gift ---
